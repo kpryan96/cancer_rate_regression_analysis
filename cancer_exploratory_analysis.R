@@ -1,6 +1,7 @@
 library(tidyverse)
 library(tidyselect)
 library(ggplot2)
+library(GGally)
 library(janitor)
 library(kableExtra)
 library(stringr)
@@ -14,10 +15,12 @@ cncr_2 <- cncr %>%
 
 # Exploratory Data Analysis - Race/Ethnicity 
 
-summary(race)
-
 race <- cncr_2 %>% 
   select(deathRate, PctWhite, PctBlack, PctAsian, PctOtherRace)
+
+cor(race$deathRate, race$PctBlack)
+
+ggpairs(race)
 
 ggplot(race, aes(x=PctWhite, y=deathRate)) +
   geom_point(size=2, shape=23) +
@@ -63,18 +66,30 @@ ggplot(whiteDR, aes(x=deathRate)) +
 t.test(x= blackDR$deathRate, y = whiteDR$deathRate, u = 0, alternative = "two.sided")
 
 # Exploratory Data Analysis - Geography 
+state_region <- read_csv("state_region.csv")
+
 geo <- cncr_2 %>% 
   select(Geography, deathRate)
 
-geo[c("County", "State")] <- str_split_fixed(geo$Geography, ",", 2)
+geo[c("County", "State")] <- str_split_fixed(geo$Geography, ", ", 2)
 
-unique(geo$State)
+geo <- geo %>% 
+  left_join(state_region, by = "State")
+
+unique(geo$Region)
+
+ggplot(geo, aes(x=Region, y=deathRate)) + 
+  geom_boxplot()
+
+summary(aov(deathRate ~ Region, data = geo))
 
 # Exploratory Data Analysis - Income/Poverty Levels 
 
 ggplot(cncr_2, aes(x=PctWhite, y=deathRate)) +
   geom_point(size=2, shape=23) +
   geom_smooth(method=lm)
+
+
 
 
 
