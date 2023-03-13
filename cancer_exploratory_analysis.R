@@ -85,15 +85,97 @@ summary(aov(deathRate ~ Region, data = geo))
 
 # Exploratory Data Analysis - Income/Poverty Levels 
 
-ggplot(cncr_2, aes(x=PctWhite, y=deathRate)) +
+ggplot(cncr_2, aes(x=medIncome, y=deathRate)) +
   geom_point(size=2, shape=23) +
   geom_smooth(method=lm)
 
+cor(cncr_2$medIncome, cncr_2$deathRate)
 
 
+ggplot(cncr_2, aes(x=povertyPercent, y=deathRate)) +
+  geom_point(size=2, shape=23) +
+  geom_smooth(method=lm)
+
+cor(cncr_2$povertyPercent, cncr_2$deathRate)
+
+# Exploratory Data Analysis - Education Levels
+Edu <- cncr_2 %>% 
+  select(PctNoHS18_24, PctHS18_24, PctSomeCol18_24, PctBachDeg18_24, PctHS25_Over, PctBachDeg25_Over, deathRate)
+
+summary(Edu)
+
+Edu$PctSomeCol18_24 <- NULL
+
+Edu_hs <- Edu %>% 
+  select(deathRate, PctNoHS18_24, PctHS18_24, PctHS25_Over)
+
+ggpairs(Edu_hs)
+
+ggplot(Edu_hs, aes(x=PctHS25_Over, y=deathRate)) +
+  geom_point(size=2, shape=23) +
+  geom_smooth(method=lm)
+
+cor(Edu_hs$deathRate, Edu_hs$PctHS25_Over)
+
+Edu_Cg <- Edu %>% 
+  select(deathRate, PctBachDeg18_24, PctBachDeg25_Over)
+
+ggpairs(Edu_Cg)
+
+cor(Edu_Cg$deathRate, Edu_Cg$PctBachDeg18_24)
 
 
+# Exploratory Data Analysis - #Marriage/Family 
+mar <- cncr_2 %>% 
+  select(AvgHouseholdSize, PercentMarried, PctMarriedHouseholds, deathRate)
 
 
+ggpairs(mar)
 
+# Exploratory Data Analysis - #Health Insurance Coverage 
+ins <- cncr_2 %>% 
+  select(PctPrivateCoverage, PctPrivateCoverageAlone, PctEmpPrivCoverage, PctPublicCoverage, PctPublicCoverageAlone, deathRate)
+
+ggpairs(ins)
+
+ggplot(ins, aes(x=PctPublicCoverage, y=deathRate)) +
+  geom_point(size=2, shape=23) +
+  geom_smooth(method=lm)
+
+ggplot(ins, aes(x=PctPublicCoverage, y=deathRate)) +
+  geom_point(size=2, shape=23) +
+  geom_smooth(method=lm)
+
+ggplot(ins, aes(x=PctPublicCoverageAlone, y=deathRate)) +
+  geom_point(size=2, shape=23) +
+  geom_smooth(method=lm)
+
+# Exploratory Data Analysis - #Birth Rate
+
+ggplot(cncr_2, aes(x=BirthRate, y=deathRate)) +
+  geom_point(size=2, shape=23) +
+  geom_smooth(method=lm)
+
+cor(cncr_2$BirthRate, cncr_2$deathRate)
+
+# Features with Strongest Correlation to Death Rate
+
+cncr_2$PctSomeCol18_24 <- NULL
+
+cncr_nums <- cncr_2 %>% 
+  select_if(is.numeric)
+
+feat_corr <- data.frame(matrix(ncol = 2, nrow = 27))
+colnames(feat_corr) <- c("Feature", "corrDeathRate")
+
+feat_corr$Feature <- colnames(cncr_nums)
+
+col_names <- colnames(cncr_nums)
+for(i in 1:27) {       
+  if(col_names[[i]] == feat_corr$Feature[i]){
+    feat_corr$corrDeathRate[[i]] <- cor(cncr_nums[,i], cncr_nums$deathRate)
+  }
+}
+
+feat_corr$absCorrDeathRate <- abs(feat_corr$corrDeathRate)
 
